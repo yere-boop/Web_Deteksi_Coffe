@@ -1,11 +1,11 @@
 "use client";
 
-import { signOut } from "next-auth/react";
+import { logoutUser } from "@/app/actions/auth";
 
 export function LogoutButton() {
   return (
     <button
-      onClick={() => signOut({ callbackUrl: "/" })}
+      onClick={() => logoutUser()}
       className="rounded-full border border-gray-200 bg-white px-4 py-1.5 text-xs font-semibold text-gray-600 transition-all hover:bg-gray-50 hover:text-[#1A1A1A] hover:border-gray-300 flex items-center gap-2 shadow-sm"
     >
       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

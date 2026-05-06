@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { updateBooking, deleteBooking } from "@/app/actions/booking";
 import type { BookingStatus, UrgencyLevel, TopicCategory } from "@/lib/types";
+import { CompleteSessionModal } from "./CompleteSessionModal";
 
 interface BookingUser {
   id: string;
@@ -72,6 +73,7 @@ export function BookingCard({
   const [isPending, startTransition] = useTransition();
   const [currentStatus, setCurrentStatus] = useState(status);
   const [isDeleted, setIsDeleted] = useState(false);
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
 
   const handleStatusChange = (newStatus: BookingStatus) => {
     const prevStatus = currentStatus;
@@ -85,6 +87,12 @@ export function BookingCard({
         setCurrentStatus(prevStatus);
       }
     });
+  };
+
+  const handleCompleteSuccess = () => {
+    setShowCompleteModal(false);
+    setCurrentStatus("COMPLETED");
+    onOptimisticUpdate?.();
   };
 
   const handleDelete = () => {
@@ -204,7 +212,7 @@ export function BookingCard({
             {viewerRole === "LECTURER" && currentStatus === "IN_PROGRESS" && (
               <button
                 id={`complete-booking-${id}`}
-                onClick={() => handleStatusChange("COMPLETED")}
+                onClick={() => setShowCompleteModal(true)}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-[#FFC107] px-3.5 py-1.5 text-xs font-bold text-[#1A1A1A] transition-colors hover:bg-[#e6ad00] shadow-sm"
               >
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -232,6 +240,13 @@ export function BookingCard({
           </div>
         )}
       </div>
+      {showCompleteModal && (
+        <CompleteSessionModal 
+          bookingId={id} 
+          onClose={() => setShowCompleteModal(false)} 
+          onSuccess={handleCompleteSuccess} 
+        />
+      )}
     </div>
   );
 }

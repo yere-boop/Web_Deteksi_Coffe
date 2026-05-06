@@ -15,11 +15,13 @@ interface SessionRow {
     topicCategory: string;
     urgencyLevel: string;
     lecturer: { id: string; name: string; email: string; department: string | null };
+    student: { id: string; name: string; email: string; department: string | null };
   };
 }
 
 interface HistoryTableProps {
-  studentId: string;
+  userId: string;
+  userRole: "STUDENT" | "LECTURER";
   initialData?: SessionRow[];
 }
 
@@ -28,9 +30,10 @@ const OUTCOME_STYLES: Record<SessionOutcome, string> = {
   FOLLOW_UP_NEEDED: "bg-amber-50 text-amber-700",
   REFERRED: "bg-blue-50 text-blue-700",
   CANCELLED: "bg-gray-100 text-gray-500",
+  SCHEDULED: "bg-[#1E5BFF]/10 text-[#1E5BFF]",
 };
 
-export function HistoryTable({ studentId, initialData = [] }: HistoryTableProps) {
+export function HistoryTable({ userId, userRole, initialData = [] }: HistoryTableProps) {
   const [sessions, setSessions] = useState<SessionRow[]>(initialData);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -39,14 +42,14 @@ export function HistoryTable({ studentId, initialData = [] }: HistoryTableProps)
   useEffect(() => {
     const fetchHistory = async () => {
       setLoading(true);
-      const res = await fetch(`/api/history/${studentId}?page=${page}&limit=10`);
+      const res = await fetch(`/api/history/${userId}?page=${page}&limit=10`);
       const data = await res.json();
-      setSessions(data.data);
-      setTotalPages(data.pagination.totalPages);
+      setSessions(data.data || []);
+      setTotalPages(data.pagination?.totalPages || 1);
       setLoading(false);
     };
     fetchHistory();
-  }, [studentId, page]);
+  }, [userId, page]);
 
   if (loading) {
     return (
@@ -75,7 +78,9 @@ export function HistoryTable({ studentId, initialData = [] }: HistoryTableProps)
                 <tr className="border-b border-gray-100 bg-gray-50/60">
                   <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">Date</th>
                   <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">Topic</th>
-                  <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">Lecturer</th>
+                  <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                    {userRole === "STUDENT" ? "Lecturer" : "Student"}
+                  </th>
                   <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">Duration</th>
                   <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">Outcome</th>
                   <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">Follow-up</th>
@@ -88,7 +93,9 @@ export function HistoryTable({ studentId, initialData = [] }: HistoryTableProps)
                       {new Date(s.booking.scheduledAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                     </td>
                     <td className="px-5 py-3.5 text-xs text-[#1A1A1A] font-semibold">{s.booking.topicCategory.replace("_", " ")}</td>
-                    <td className="px-5 py-3.5 text-xs text-gray-600">{s.booking.lecturer.name}</td>
+                    <td className="px-5 py-3.5 text-xs text-gray-600">
+                      {userRole === "STUDENT" ? s.booking.lecturer.name : s.booking.student.name}
+                    </td>
                     <td className="px-5 py-3.5 text-xs text-gray-600">{s.durationMin} min</td>
                     <td className="px-5 py-3.5">
                       <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${OUTCOME_STYLES[s.outcome]}`}>

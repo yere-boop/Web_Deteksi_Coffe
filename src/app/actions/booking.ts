@@ -67,6 +67,8 @@ export async function createBooking(input: z.infer<typeof createBookingSchema>) 
       priorityScore: score,
       scheduledAt: new Date(validated.scheduledAt),
       description: validated.description,
+      consultationMode: validated.consultationMode,
+      location: validated.location,
     },
     include: {
       student: { select: { id: true, name: true, email: true, department: true } },

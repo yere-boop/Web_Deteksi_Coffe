@@ -16,6 +16,8 @@ export const createBookingSchema = z.object({
   scheduledAt: z.string().datetime(),
   description: z.string().max(2000).optional(),
   examDate: z.string().datetime().nullable().optional(),
+  consultationMode: z.enum(["ONLINE", "OFFLINE"]).default("OFFLINE"),
+  location: z.string().max(255).optional(),
 });
 
 export const updateBookingSchema = z.object({

@@ -78,8 +78,10 @@ model Booking {
   status        String        @default("PENDING")
   scheduledAt   DateTime
   description   String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  consultationMode String        @default("OFFLINE")
+  location         String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 
   student  User      @relation("StudentBookings", fields: [studentId], references: [id], onDelete: Cascade)
   lecturer User      @relation("LecturerBookings", fields: [lecturerId], references: [id], onDelete: Cascade)

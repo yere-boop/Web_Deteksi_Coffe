@@ -1,8 +1,13 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { signOut } from "@/lib/auth";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+
+export async function logoutUser() {
+  await signOut({ redirectTo: "/login" });
+}
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
