@@ -5,17 +5,19 @@ import { createClient } from "@libsql/client";
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
 const createPrismaClient = () => {
-  const url = process.env.DATABASE_URL;
+  // Use TURSO_URL for cloud deployment, fallback to DATABASE_URL or local sqlite
+  const tursoUrl = process.env.TURSO_URL;
   
-  if (url?.startsWith("libsql://")) {
+  if (tursoUrl?.startsWith("libsql://")) {
     const libsql = createClient({
-      url: process.env.DATABASE_URL!,
-      authToken: process.env.DATABASE_AUTH_TOKEN, // Optional, depending on how they set the URL
+      url: tursoUrl,
+      authToken: process.env.DATABASE_AUTH_TOKEN,
     });
     const adapter = new PrismaLibSQL(libsql);
     return new PrismaClient({ adapter });
   }
 
+  // Fallback for local development
   return new PrismaClient();
 };
 
