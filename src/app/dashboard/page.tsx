@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { StudentDashboardClient } from "@/components/StudentDashboardClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function StudentDashboard() {
   const session = await auth();
   if (!session?.user) redirect("/login");
