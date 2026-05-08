@@ -5,21 +5,30 @@ import { createClient } from "@libsql/client";
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
 const createPrismaClient = () => {
-  // Use TURSO_URL for cloud deployment, fallback to DATABASE_URL or local sqlite
   const tursoUrl = process.env.TURSO_URL;
   
-  if (tursoUrl?.startsWith("libsql://")) {
-    const libsql = createClient({
-      url: tursoUrl,
-      authToken: process.env.DATABASE_AUTH_TOKEN,
-    });
-    // @ts-ignore - Bypass type mismatch between adapter and client versions
-    const adapter = new PrismaLibSql(libsql as any);
-    // @ts-ignore - Bypass type mismatch for adapter property
-    return new PrismaClient({ adapter });
+  // If we are building on Vercel, use a standard PrismaClient to avoid adapter errors
+  // The adapter is only needed at runtime to connect to Turso.
+  if (process.env.VERCEL === "1" && !process.env.TURSO_URL) {
+     return new PrismaClient();
   }
 
-  // Fallback for local development
+  if (tursoUrl?.startsWith("libsql://")) {
+    try {
+      const libsql = createClient({
+        url: tursoUrl,
+        authToken: process.env.DATABASE_AUTH_TOKEN,
+      });
+      // @ts-ignore
+      const adapter = new PrismaLibSql(libsql as any);
+      // @ts-ignore
+      return new PrismaClient({ adapter });
+    } catch (e) {
+      console.error("Failed to initialize Turso adapter:", e);
+      return new PrismaClient();
+    }
+  }
+
   return new PrismaClient();
 };
 
