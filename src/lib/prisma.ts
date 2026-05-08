@@ -13,7 +13,9 @@ const createPrismaClient = () => {
       url: tursoUrl,
       authToken: process.env.DATABASE_AUTH_TOKEN,
     });
-    const adapter = new PrismaLibSql(libsql);
+    // @ts-ignore - Bypass type mismatch between adapter and client versions
+    const adapter = new PrismaLibSql(libsql as any);
+    // @ts-ignore - Bypass type mismatch for adapter property
     return new PrismaClient({ adapter });
   }
 
