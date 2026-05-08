@@ -4,7 +4,7 @@ import { createClient } from "@libsql/client";
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
-function createPrismaClient(): PrismaClient {
+const createPrismaClient = () => {
   const tursoUrl = process.env.TURSO_URL;
 
   if (tursoUrl?.startsWith("libsql://")) {
@@ -17,7 +17,7 @@ function createPrismaClient(): PrismaClient {
   }
 
   return new PrismaClient();
-}
+};
 
 export const prisma = globalForPrisma.prisma || createPrismaClient();
 
